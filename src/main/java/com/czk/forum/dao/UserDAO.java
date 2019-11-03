@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 public interface UserDAO {
     String INSERT_FILEDS = "username, password, salt, email, activation_code, avatar, gmt_create";
     @Insert("insert into user (" + INSERT_FILEDS + ") values (#{username}, #{password}, #{salt}, #{email}, #{activationCode}, #{avatar}, #{gmtCreate})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     void add(User user);
 
     @Select("select * from user where id=#{id}")

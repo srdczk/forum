@@ -1,6 +1,9 @@
 package com.czk.forum.service;
 
+import com.czk.forum.dao.LoginTicketDAO;
 import com.czk.forum.dao.UserDAO;
+import com.czk.forum.dto.LoginDTO;
+import com.czk.forum.model.LoginTicket;
 import com.czk.forum.model.User;
 import com.czk.forum.util.ForumConstant;
 import com.czk.forum.util.ForumUtil;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -35,6 +39,9 @@ public class UserService implements ForumConstant {
 
     @Value("${server.servlet.context-path}")
     private String contextPath;
+
+    @Autowired
+    private LoginTicketDAO loginTicketDAO;
 
     public User findUserById(Integer id) {
         return userDAO.getById(id);
@@ -80,7 +87,7 @@ public class UserService implements ForumConstant {
         user.setActivationCode(ForumUtil.generateUUID());
 
         userDAO.add(user);
-        user = userDAO.getByName(user.getUsername());
+//        System.out.println(user.getId());
         Context context = new Context();
         context.setVariable("email", user.getEmail());
         //激活路径设计：activation/101/code
@@ -100,6 +107,70 @@ public class UserService implements ForumConstant {
         if (!user.getActivationCode().equals(code)) return ACTIVATION_FAILUE;
         userDAO.activationSuccess(user);
         return ACTIVATION_SUCCESS;
+    }
+
+    public Map<String, Object> login(LoginDTO loginDTO, HttpSession session) {
+        Map<String, Object> map = new HashMap<>();
+        //空值判断
+        if (StringUtils.isBlank(loginDTO.getUsername())) {
+            map.put("usernameMsg", "账号不能为空!");
+            return map;
+        }
+
+        if (StringUtils.isBlank(loginDTO.getPassword())) {
+            map.put("passwordMsg", "密码不能为空!");
+            return map;
+        }
+
+        if (StringUtils.isBlank(loginDTO.getVerifycode())) {
+            map.put("verifycodeMsg", "验证码不能为空");
+            return map;
+        }
+
+        if (!loginDTO.getVerifycode().equals(session.getAttribute("kaptcha"))) {
+            map.put("verifycodeMsg", "验证码不正确");
+            return map;
+        }
+
+        User user = userDAO.getByName(loginDTO.getUsername());
+        System.out.println(user);
+        if (user == null) {
+            map.put("usernameMsg", "账号不存在!");
+            return map;
+        }
+        //验证状态
+        if (user.getStatus() == 0) {
+            map.put("usernameMsg", "该账号未激活!");
+            return map;
+        }
+
+        //验证密码
+        String password = ForumUtil.md5(loginDTO.getPassword() + user.getSalt());
+        if (!password.equals(user.getPassword())) {
+            map.put("passwordMsg", "密码错误!");
+            return map;
+        }
+
+        //生成登录凭证
+        LoginTicket loginTicket = new LoginTicket();
+        loginTicket.setUserId(user.getId());
+        loginTicket.setTicket(ForumUtil.generateUUID());
+        loginTicket.setStatus(0);
+        if (loginDTO.getRember() != null && loginDTO.getRember().equals("on")) loginTicket.setExpired(System.currentTimeMillis() + REMBER_MILSECONDS);
+        else loginTicket.setExpired(System.currentTimeMillis() + DEFAULT_MILSECONDS);
+        loginTicketDAO.add(loginTicket);
+
+        map.put("ticket", loginTicket.getTicket());
+
+        return map;
+    }
+
+    public void logout(String ticket) {
+        LoginTicket loginTicket = loginTicketDAO.getByTicket(ticket);
+        if (loginTicket != null) {
+            loginTicket.setStatus(1);
+            loginTicketDAO.updateStatus(loginTicket);
+        }
     }
 
 }

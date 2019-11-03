@@ -30,3 +30,14 @@ CREATE TABLE discuss_post
     score INT DEFAULT 0 COMMENT '分数-精华帖子排序',
     KEY index_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS login_ticket;
+CREATE TABLE login_ticket
+(
+    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+    user_id INT NOT NULL,
+    ticket VARCHAR(45) NOT NULL,
+    status INT DEFAULT 0,
+    expired BIGINT NOT NULL,
+    KEY  index_ticket (ticket(20))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

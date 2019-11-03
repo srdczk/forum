@@ -1,10 +1,7 @@
 package com.czk.forum.dao;
 
 import com.czk.forum.model.DiscussPost;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -18,6 +15,7 @@ public interface DiscussPostDAO {
     String INSERT_FIELDS = "user_id, title, content, gmt_create";
 
     @Insert("insert into discuss_post (" + INSERT_FIELDS + ") values (#{userId}, #{title}, #{content}, #{gmtCreate})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     void add(DiscussPost discussPost);
 
     @Select("select * from discuss_post order by type desc, gmt_create desc limit #{off}, #{cnt}")

@@ -1,5 +1,6 @@
 package com.czk.forum.controller;
 
+import com.czk.forum.dto.LoginDTO;
 import com.czk.forum.model.User;
 import com.czk.forum.service.UserService;
 import com.czk.forum.util.ForumConstant;
@@ -7,11 +8,13 @@ import com.google.code.kaptcha.Producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
@@ -29,6 +32,9 @@ public class LoginController implements ForumConstant {
 
     @Autowired
     private UserService userService;
+
+    @Value("${server.servlet.context-path}")
+    private String path;
 
     @RequestMapping(value = "/reg", method = RequestMethod.GET)
     public String getRegisterPage() {
@@ -107,6 +113,32 @@ public class LoginController implements ForumConstant {
     @ResponseBody
     public String session(@PathVariable(value = "name") String name, HttpSession session) {
         return session.getAttribute(name).toString();
+    }
+
+    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    public String login(LoginDTO loginDTO, HttpSession session, Model model, HttpServletResponse response) {
+        Map<String, Object> map = userService.login(loginDTO, session);
+        if (map.containsKey("ticket")) {
+            Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
+            cookie.setPath(path);
+            if (loginDTO.getRember() != null && loginDTO.getRember().equals("on")) {
+                cookie.setMaxAge((int) (REMBER_MILSECONDS / 1000));
+            } else cookie.setMaxAge((int) (DEFAULT_MILSECONDS / 1000));
+            response.addCookie(cookie);
+            return "redirect:/";
+        } else {
+            model.addAttribute("usernameMsg", map.get("usernameMsg"));
+            model.addAttribute("passwordMsg", map.get("passwordMsg"));
+            model.addAttribute("verifycodeMsg", map.get("verifycodeMsg"));
+            model.addAttribute("user", loginDTO);
+            return "/site/login";
+        }
+    }
+
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public String logout(@CookieValue("ticket") String ticket) {
+        userService.logout(ticket);
+        return "redirect:/login";
     }
 
 }
