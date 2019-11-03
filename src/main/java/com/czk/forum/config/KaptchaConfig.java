@@ -14,7 +14,6 @@ import java.util.Properties;
 @Configuration
 public class KaptchaConfig {
 
-
     @Bean
     public Producer kaptcherProducer() {
         Properties properties = new Properties();

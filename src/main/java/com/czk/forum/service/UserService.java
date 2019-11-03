@@ -173,4 +173,9 @@ public class UserService implements ForumConstant {
         }
     }
 
+
+    public LoginTicket findLoginTicket(String ticket) {
+        return loginTicketDAO.getByTicket(ticket);
+    }
+
 }
