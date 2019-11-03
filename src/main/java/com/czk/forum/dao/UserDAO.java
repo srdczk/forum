@@ -1,10 +1,7 @@
 package com.czk.forum.dao;
 
 import com.czk.forum.model.User;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,4 +16,13 @@ public interface UserDAO {
 
     @Select("select * from user where id=#{id}")
     User getById(@Param(value = "id") Integer id);
+    
+    @Select("select * from user where username=#{username}")
+    User getByName(@Param(value = "username") String username);
+    
+    @Select("select * from user where email=#{email}")
+    User getByEmail(@Param(value = "email") String email);
+
+    @Update("update user set status=1 where id=#{id}")
+    int activationSuccess(User user);
 }
