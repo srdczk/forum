@@ -3,11 +3,20 @@ package com.czk.forum.controller;
 import com.czk.forum.model.User;
 import com.czk.forum.service.UserService;
 import com.czk.forum.util.ForumConstant;
+import com.google.code.kaptcha.Producer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
 /**
@@ -15,6 +24,8 @@ import java.util.Map;
  */
 @Controller
 public class LoginController implements ForumConstant {
+
+    private static final Logger logger = LoggerFactory.getLogger(LoginController.class);
 
     @Autowired
     private UserService userService;
@@ -71,5 +82,31 @@ public class LoginController implements ForumConstant {
 //    public Map<String, Object> {
 //
 //    }
+    @Autowired
+    private Producer kaptchaProducer;
+
+    @RequestMapping(value = "/kaptcha", method = RequestMethod.GET)
+    public void kaptcha(HttpServletResponse response, HttpSession session) {
+        //生成验证码
+        String text = kaptchaProducer.createText();
+        //生成图片
+        BufferedImage image = kaptchaProducer.createImage(text);
+
+        //设置本次会话
+        session.setAttribute("kaptcha", text);
+        //将图片直接输出给浏览器
+        response.setContentType("image/png");
+        try (OutputStream os = response.getOutputStream()){
+            ImageIO.write(image, "png", os);
+        } catch (IOException e) {
+            logger.error("图片错误:" + e.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "/session/{name}", method = RequestMethod.GET)
+    @ResponseBody
+    public String session(@PathVariable(value = "name") String name, HttpSession session) {
+        return session.getAttribute(name).toString();
+    }
 
 }

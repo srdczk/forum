@@ -13,6 +13,8 @@
 
 [maven](https://mvnrepository.com/)
 
+[Kaptcha](https://code.google.com/archive/p/kaptcha/)
+
 ### 脚本
 
 ```sql

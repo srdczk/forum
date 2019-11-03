@@ -1,15 +1,11 @@
 package com.czk.forum.controller;
 
-import com.czk.forum.dao.DiscussPostDAO;
-import com.czk.forum.dao.UserDAO;
 import com.czk.forum.model.DiscussPost;
 import com.czk.forum.model.Page;
-import com.czk.forum.model.User;
 import com.czk.forum.service.DiscussPostService;
 import com.czk.forum.service.PageService;
 import com.czk.forum.service.UserService;
-import javafx.beans.binding.ObjectExpression;
-import org.apache.ibatis.annotations.Mapper;
+import com.czk.forum.util.ForumUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -18,7 +14,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * created by srdczk 2019/10/30
@@ -53,4 +54,5 @@ public class IndexController {
         model.addAttribute("cur", page);
         return "index";
     }
+    //session 在分布式下出现的问题,nigix负载均衡
 }
