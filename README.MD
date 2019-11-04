@@ -51,3 +51,7 @@ CREATE TABLE discuss_post
     KEY index_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 ```
+
+### 数据结构
+敏感词过滤器: 前缀树 [Trie](https://zh.wikipedia.org/zh-hans/Trie)
+
