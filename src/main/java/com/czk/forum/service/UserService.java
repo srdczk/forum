@@ -133,7 +133,7 @@ public class UserService implements ForumConstant {
         }
 
         User user = userDAO.getByName(loginDTO.getUsername());
-        System.out.println(user);
+//        System.out.println(user);
         if (user == null) {
             map.put("usernameMsg", "账号不存在!");
             return map;
@@ -176,6 +176,11 @@ public class UserService implements ForumConstant {
 
     public LoginTicket findLoginTicket(String ticket) {
         return loginTicketDAO.getByTicket(ticket);
+    }
+
+
+    public int updateAvatar(Integer userId, String avatar) {
+        return userDAO.updateAvatar(avatar, userId);
     }
 
 }

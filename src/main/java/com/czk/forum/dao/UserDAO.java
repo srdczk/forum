@@ -26,4 +26,8 @@ public interface UserDAO {
 
     @Update("update user set status=1 where id=#{id}")
     int activationSuccess(User user);
+
+    @Update("update user set avatar=#{avatar} where id=#{id}")
+    int updateAvatar(@Param(value = "avatar") String avatar, @Param(value = "id") Integer id);
+
 }
