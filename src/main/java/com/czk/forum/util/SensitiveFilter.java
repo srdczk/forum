@@ -102,7 +102,6 @@ public class SensitiveFilter {
                 ) {
             String keyword;
             while ((keyword = bf.readLine()) != null) {
-                System.out.println(keyword);
                 addKeyword(keyword);
             }
         } catch (IOException e) {

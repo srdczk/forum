@@ -1,9 +1,13 @@
 package com.czk.forum.service;
 
 import com.czk.forum.dao.DiscussPostDAO;
+import com.czk.forum.dao.PostDTO;
 import com.czk.forum.model.DiscussPost;
+import com.czk.forum.model.User;
+import com.czk.forum.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -12,6 +16,10 @@ import java.util.List;
  */
 @Service
 public class DiscussPostService {
+
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
+
     @Autowired
     private DiscussPostDAO discussPostDAO;
 
@@ -24,4 +32,25 @@ public class DiscussPostService {
         if (userId == null) return discussPostDAO.sum();
         else return discussPostDAO.sumOfUser(userId);
     }
+
+    public void addDiscussPost(PostDTO postDTO, Integer userId) {
+        if (postDTO == null) {
+            throw new IllegalArgumentException("参数不能为空!");
+        }
+        postDTO.setTitle(HtmlUtils.htmlEscape(postDTO.getTitle()));
+        postDTO.setContent(HtmlUtils.htmlEscape(postDTO.getContent()));
+
+
+        postDTO.setTitle(sensitiveFilter.filter(postDTO.getTitle()));
+        postDTO.setContent(sensitiveFilter.filter(postDTO.getContent()));
+
+        DiscussPost post = new DiscussPost();
+        post.setUserId(userId);
+        post.setTitle(postDTO.getTitle());
+        post.setContent(postDTO.getContent());
+        post.setGmtCreate(System.currentTimeMillis());
+
+        discussPostDAO.add(post);
+    }
+
 }
