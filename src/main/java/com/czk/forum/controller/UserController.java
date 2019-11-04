@@ -1,5 +1,7 @@
 package com.czk.forum.controller;
 
+import com.czk.forum.annotation.LoginRequired;
+import com.czk.forum.dto.PasswordDTO;
 import com.czk.forum.model.User;
 import com.czk.forum.service.UserService;
 import com.czk.forum.util.ForumUtil;
@@ -14,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * created by srdczk 2019/11/4
@@ -46,11 +50,14 @@ public class UserController {
     @Value("${server.servlet.context-path}")
     private String contextPath;
 
+    @LoginRequired
     @RequestMapping(value = "/setting", method = RequestMethod.GET)
     public String getSettingPage() {
         return "/site/setting";
     }
 
+    @LoginRequired
+    //需要user
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     public String uploadAvatar(MultipartFile image, Model model) {
         if (image == null) {
@@ -85,6 +92,7 @@ public class UserController {
         return "redirect:/";
     }
 
+    //不用登录
     //获取头像
     @RequestMapping(value = "/avatar/{name}", method = RequestMethod.GET)
     public void getImage(@PathVariable(value = "name") String name, HttpServletResponse response) {
@@ -107,4 +115,20 @@ public class UserController {
         }
     }
 
+
+    //修改密码
+    @LoginRequired
+    @RequestMapping(value = "/modify", method = RequestMethod.POST)
+    public String modify(PasswordDTO passwordDTO, Model model) {
+        Map<String, Object> map = userService.modifyPassword(passwordDTO, hostHolder.getUser());
+        if (map == null || map.isEmpty()) {
+            return "redirect:/logout";
+        } else {
+            model.addAttribute("opasswordMsg", map.get("opasswordMsg"));
+            model.addAttribute("npasswordMsg", map.get("npasswordMsg"));
+            model.addAttribute("cpasswordMsg", map.get("cpasswordMsg"));
+            model.addAttribute("password", passwordDTO);
+            return "/site/setting";
+        }
+    }
 }

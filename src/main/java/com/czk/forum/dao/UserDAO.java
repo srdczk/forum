@@ -30,4 +30,7 @@ public interface UserDAO {
     @Update("update user set avatar=#{avatar} where id=#{id}")
     int updateAvatar(@Param(value = "avatar") String avatar, @Param(value = "id") Integer id);
 
+    @Update("update user set salt=#{salt}, password=#{password} where id=#{id}")
+    int updatePassword(User user);
+
 }

@@ -3,6 +3,7 @@ package com.czk.forum.service;
 import com.czk.forum.dao.LoginTicketDAO;
 import com.czk.forum.dao.UserDAO;
 import com.czk.forum.dto.LoginDTO;
+import com.czk.forum.dto.PasswordDTO;
 import com.czk.forum.model.LoginTicket;
 import com.czk.forum.model.User;
 import com.czk.forum.util.ForumConstant;
@@ -181,6 +182,53 @@ public class UserService implements ForumConstant {
 
     public int updateAvatar(Integer userId, String avatar) {
         return userDAO.updateAvatar(avatar, userId);
+    }
+
+    public Map<String, Object> modifyPassword(PasswordDTO passwordDTO, User user) {
+        Map<String, Object> map = new HashMap<>();
+        //判断是否为空
+        if (StringUtils.isBlank(passwordDTO.getOpassword())) {
+            map.put("opasswordMsg", "原密码不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(passwordDTO.getNpassword())) {
+            map.put("npasswordMsg", "新密码不能为空!");
+            return map;
+        }
+        if (StringUtils.isBlank(passwordDTO.getCpassword())) {
+            map.put("cpasswordMsg", "确认密码不能为空!");
+            return map;
+        }
+        //两次输入密码不一样
+        if (!passwordDTO.getNpassword().equals(passwordDTO.getCpassword())) {
+            map.put("cpasswordMsg", "两次输入密码不一样!");
+            return map;
+        }
+        if (passwordDTO.getNpassword().length() < 8) {
+            map.put("npasswordMsg", "新密码长度不能少于8位数!");
+            return map;
+        }
+        //确认密码是否正确
+        String src = ForumUtil.md5(passwordDTO.getOpassword() + user.getSalt());
+        if (!src.equals(user.getPassword())) {
+            map.put("opasswordMsg", "密码错误,请检查!");
+            return map;
+        }
+
+        if (passwordDTO.getNpassword().equals(passwordDTO.getOpassword())) {
+            map.put("npasswordMsg", "不能与原密码一致!");
+            return map;
+        }
+
+        String salt = ForumUtil.generateUUID().substring(0, 5);
+        String newPassword = ForumUtil.md5(passwordDTO.getNpassword() + salt);
+
+        user.setSalt(salt);
+        user.setPassword(newPassword);
+
+        userDAO.updatePassword(user);
+
+        return map;
     }
 
 }
