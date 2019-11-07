@@ -16,4 +16,8 @@ public interface ForumConstant {
 
     long REMBER_MILSECONDS = 1000 * 3600 * 24 * 100;
 
+    //帖子的实体类型
+    int ENTITY_TYPE_POST = 1;
+
+    int ENTITY_TYPE_COMMENT = 2;
 }

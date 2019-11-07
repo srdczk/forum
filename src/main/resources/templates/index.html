@@ -124,12 +124,12 @@
                     </a>
                     <div class="media-body">
                         <h6 class="mt-0 mb-3">
-                            <a href="site/discuss-detail.html" th:text="${di.get('post').getTitle()}"></a>
+                            <a th:href="@{|/discuss/detail/${di.post.id}|}" th:text="${di.get('post').getTitle()}"></a>
                             <span th:if="${di.post.type == 1}" class="badge badge-secondary bg-primary">置顶</span>
                             <span th:if="${di.post.status == 2}" class="badge badge-secondary bg-danger">精华</span>
                         </h6>
                         <div class="text-muted font-size-12">
-                            <u class="mr-3" th:text="${di.user.username}"></u> 发布于 <b th:text="${#dates.format(di.post.gmtCreate, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b>
+                            <u class="mr-3" th:text="${di.user.username}"></u> 发布于 <b th:text="${#dates.format(di.post.gmtCreate, 'yyyy-MM-dd HH:mm:ss')}"></b>
                             <ul class="d-inline float-right">
                                 <li class="d-inline ml-2">赞 11</li>
                                 <li class="d-inline ml-2">|</li>

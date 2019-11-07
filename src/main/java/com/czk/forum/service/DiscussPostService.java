@@ -1,9 +1,8 @@
 package com.czk.forum.service;
 
 import com.czk.forum.dao.DiscussPostDAO;
-import com.czk.forum.dao.PostDTO;
+import com.czk.forum.dto.PostDTO;
 import com.czk.forum.model.DiscussPost;
-import com.czk.forum.model.User;
 import com.czk.forum.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,6 +50,10 @@ public class DiscussPostService {
         post.setGmtCreate(System.currentTimeMillis());
 
         discussPostDAO.add(post);
+    }
+
+    public DiscussPost findPostById(Integer id) {
+        return discussPostDAO.getById(id);
     }
 
 }

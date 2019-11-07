@@ -29,4 +29,11 @@ public interface DiscussPostDAO {
 
     @Select("select count(*) from discuss_post where user_id = #{userId}")
     Integer sumOfUser(@Param(value = "userId") Integer userId);
+
+    @Select("select * from discuss_post where id=#{id}")
+    DiscussPost getById(@Param(value = "id") Integer id);
+
+    @Update("update discuss_post set comment_count=#{commentCount} where id=#{id}")
+    void updateCommentCount(DiscussPost post);
+
 }

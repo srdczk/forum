@@ -1,4 +1,4 @@
-package com.czk.forum.dao;
+package com.czk.forum.dto;
 
 /**
  * created by srdczk 2019/11/4

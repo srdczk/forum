@@ -1,5 +1,5 @@
+/**
 DROP TABLE IF EXISTS user;
-
 CREATE TABLE user
 (
   id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
@@ -15,7 +15,7 @@ CREATE TABLE user
   KEY index_username (username(20)),
   KEY index_email (email(20))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
+**/
 DROP TABLE IF EXISTS discuss_post;
 CREATE TABLE discuss_post
 (
@@ -40,4 +40,17 @@ CREATE TABLE login_ticket
     status INT DEFAULT 0,
     expired BIGINT NOT NULL,
     KEY  index_ticket (ticket(20))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS comment;
+CREATE TABLE comment
+(
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  entity_type INT NOT NULL,
+  entity_id INT NOT NULL,
+  target_id INT NOT NULL,
+  content TEXT,
+  status INT DEFAULT 0,
+  gmt_create BIGINT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
