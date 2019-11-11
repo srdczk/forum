@@ -1,10 +1,7 @@
 package com.czk.forum.dao;
 
 import com.czk.forum.model.Message;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,6 +17,7 @@ public interface MessageDAO {
 
     //插入数据
     @Insert("insert into message (" + INSERT_FIELDS + ") values (#{fromId}, #{toId}, #{conversationId}, #{content}, #{gmtCreate})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
     void add(Message message);
 
     // 查询当前用户的会话列表
@@ -45,4 +43,9 @@ public interface MessageDAO {
 
     @Select("select count(*) from message where status=0 and from_id != 1 and to_id=#{userId} and conversation_id=#{conversationId}")
     Integer selectConversationUnread(@Param(value = "userId") Integer userId, @Param(value = "conversationId") String conversationId);
+
+    //修改
+    @Update("update message set status=#{status} where id=#{id}")
+    int updateStatus(@Param(value = "id") Integer id, @Param(value = "status") Integer status);
+
 }

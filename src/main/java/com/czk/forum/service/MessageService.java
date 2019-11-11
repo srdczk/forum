@@ -2,8 +2,10 @@ package com.czk.forum.service;
 
 import com.czk.forum.dao.MessageDAO;
 import com.czk.forum.model.Message;
+import com.czk.forum.util.SensitiveFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 
@@ -14,6 +16,9 @@ import java.util.List;
 public class MessageService {
     @Autowired
     private MessageDAO messageDAO;
+
+    @Autowired
+    private SensitiveFilter sensitiveFilter;
 
     public Integer findConversationCount(Integer userId) {
         return messageDAO.selectConversationCount(userId);
@@ -39,4 +44,15 @@ public class MessageService {
         return messageDAO.selectLetters(conversationId, off, cnt);
     }
 
+    public void addMessage(Message message) {
+        message.setContent(HtmlUtils.htmlEscape(message.getContent()));
+        message.setContent(sensitiveFilter.filter(message.getContent()));
+        messageDAO.add(message);
+    }
+
+    public int readMessage(Integer msgId) {
+        //修改数据的状态为1
+        return messageDAO.updateStatus(msgId, 1);
+    }
+    
 }

@@ -231,4 +231,8 @@ public class UserService implements ForumConstant {
         return map;
     }
 
+    public User findUserByName(String name) {
+        return userDAO.getByName(name);
+    }
+
 }
