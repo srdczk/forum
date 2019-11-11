@@ -16,6 +16,7 @@ CREATE TABLE user
   KEY index_email (email(20))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 **/
+/**
 DROP TABLE IF EXISTS discuss_post;
 CREATE TABLE discuss_post
 (
@@ -53,4 +54,18 @@ CREATE TABLE comment
   content TEXT,
   status INT DEFAULT 0,
   gmt_create BIGINT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+**/
+DROP TABLE IF EXISTS message;
+
+CREATE TABLE message
+(
+  id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  from_id INT NOT NULL,
+  to_id INT NOT NULL,
+  conversation_id VARCHAR(32) NOT NULL,
+  content TEXT,
+  status INT DEFAULT 0 COMMENT '0 未读 1 已经读取',
+  gmt_create BIGINT,
+  KEY  index_conversation_id(conversation_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

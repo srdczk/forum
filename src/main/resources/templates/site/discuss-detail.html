@@ -100,7 +100,7 @@
                                                 <li class="d-inline ml-2">|</li>
                                                 <li class="d-inline ml-2"><a th:href="'#huifu' + ${replyMap.reply.id}" data-toggle="collapse" class="text-primary">回复</a></li>
                                             </ul>
-                                            <div th:id="'huifu' + ${replyMap.reply.id}" class="mt-4 collapse">
+                                            <div th:if="${loginUser != null}" th:id="'huifu' + ${replyMap.reply.id}" class="mt-4 collapse">
                                                 <!--这种是第二种-->
                                                 <form method="post" th:action="'/forum/comment/add/' + ${post.id}">
                                                     <div>
@@ -129,7 +129,7 @@
                                                 <li class="d-inline ml-2">|</li>
                                                 <li class="d-inline ml-2"><a th:href="'#huifu' + ${replyMap.reply.id}" data-toggle="collapse" class="text-primary">回复</a></li>
                                             </ul>
-                                            <div th:id="'huifu' + ${replyMap.reply.id}" class="mt-4 collapse">
+                                            <div th:if="${loginUser != null}" th:id="'huifu' + ${replyMap.reply.id}" class="mt-4 collapse">
                                                 <!--这种是第二种-->
                                                 <form method="post" th:action="'/forum/comment/add/' + ${post.id}">
                                                     <div>
@@ -147,7 +147,7 @@
                                     </div>
 								</li>
 								<!-- 回复输入框 -->
-								<li class="pb-3 pt-3">
+								<li th:if="${loginUser != null}" class="pb-3 pt-3">
                                     <form method="post" th:action="'/forum/comment/add/' + ${post.id}">
                                         <div>
                                             <input type="text" class="input-size" name="content" placeholder="请输入你的观点">
