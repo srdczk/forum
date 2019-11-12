@@ -6,6 +6,25 @@ public class LikeDTO {
 
     private Integer entityId;
 
+    private Integer entityUserId;
+
+    public Integer getEntityUserId() {
+        return entityUserId;
+    }
+
+    public void setEntityUserId(Integer entityUserId) {
+        this.entityUserId = entityUserId;
+    }
+
+    @Override
+    public String toString() {
+        return "LikeDTO{" +
+                "entityType=" + entityType +
+                ", entityId=" + entityId +
+                ", entityUserId=" + entityUserId +
+                '}';
+    }
+
     public Integer getEntityType() {
         return entityType;
     }
@@ -22,11 +41,4 @@ public class LikeDTO {
         this.entityId = entityId;
     }
 
-    @Override
-    public String toString() {
-        return "LikeDTO{" +
-                "entityType=" + entityType +
-                ", entityId=" + entityId +
-                '}';
-    }
 }

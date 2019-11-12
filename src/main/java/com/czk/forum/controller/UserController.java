@@ -3,6 +3,7 @@ package com.czk.forum.controller;
 import com.czk.forum.annotation.LoginRequired;
 import com.czk.forum.dto.PasswordDTO;
 import com.czk.forum.model.User;
+import com.czk.forum.service.LikeService;
 import com.czk.forum.service.UserService;
 import com.czk.forum.util.ForumUtil;
 import com.czk.forum.util.HostHolder;
@@ -33,6 +34,9 @@ import java.util.Map;
 public class UserController {
 
     private static final Logger logger  = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    private LikeService likeService;
 
     @Autowired
     private HostHolder hostHolder;
@@ -129,5 +133,22 @@ public class UserController {
             model.addAttribute("password", passwordDTO);
             return "/site/setting";
         }
+    }
+
+    // 个人主页
+    @RequestMapping(value = "/profile/{id}", method = RequestMethod.GET)
+    public String profile(@PathVariable(value = "id") Integer id,
+                          Model model) {
+
+        User user = userService.findUserById(id);
+
+        if (user == null) throw new RuntimeException("该用户不存在!");
+
+        // 用户的基本信息
+        model.addAttribute("user", user);
+
+        model.addAttribute("likeCount", likeService.findUserLikeCount(user.getId()));
+
+        return "/site/profile";
     }
 }

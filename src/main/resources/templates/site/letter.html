@@ -82,7 +82,7 @@
                         <!--if (targetId.equals(user.getId())) targetId = message.getToId();-->
                         <!--map.put("target", userService.findUserById(targetId));-->
 						<span th:if="${conversation.unreadCount != 0}" class="badge badge-danger" th:text="${conversation.unreadCount}"></span>
-						<a href="profile.html">
+						<a th:href="@{|/user/profile/${conversation.target.id}|}">
 							<img th:src="${conversation.target.avatar}" class="mr-4 rounded-circle user-header" alt="用户头像" >
 						</a>
 						<div class="media-body">

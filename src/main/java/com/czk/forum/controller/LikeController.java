@@ -33,9 +33,10 @@ public class LikeController {
     public String like(@RequestBody LikeDTO likeDTO) {
         Integer entityType = likeDTO.getEntityType();
         Integer entityId = likeDTO.getEntityId();
+        Integer entityUserId = likeDTO.getEntityUserId();
         User user = hostHolder.getUser();
         // 实现点赞
-        likeService.like(user.getId(), entityType, entityId);
+        likeService.like(user.getId(), entityType, entityId, entityUserId);
         // 获取数量
         long likeCount = likeService.findEntityCount(entityType, entityId);
 
