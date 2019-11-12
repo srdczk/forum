@@ -11,6 +11,7 @@ import redis.clients.jedis.Response;
 import redis.clients.jedis.Transaction;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 public class RedisAdapter implements InitializingBean {
@@ -230,6 +231,34 @@ public class RedisAdapter implements InitializingBean {
         } catch (Exception e) {
             logger.error("发生异常" + e.getMessage());
             return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    public Set<String> getPage(String key, int off, int cnt) {
+        try {
+            jedis = pool.getResource();
+            return jedis.zrevrange(key, off, off + cnt);
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+            return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    public double zscore(String key, String val) {
+        try {
+            jedis = pool.getResource();
+            return jedis.zscore(key, val);
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+            return 0;
         } finally {
             if (jedis != null) {
                 jedis.close();

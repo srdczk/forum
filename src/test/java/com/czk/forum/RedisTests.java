@@ -11,21 +11,22 @@ import org.springframework.test.context.junit4.SpringRunner;
 import redis.clients.jedis.Jedis;
 
 import java.util.List;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(classes = ForumApplication.class)
 public class RedisTests {
-    @Autowired
-    private Jedis jedis;
 
     @Test
     public void testJedis() {
-        jedis.set("nima", "34");
-        System.out.println(jedis.get("nima"));
-        String c = jedis.get("sd");
-        if (c == null) System.out.println("NAMSILE");
-        else System.out.println(c);
+        Jedis jedis = new Jedis();
+        jedis.zadd("nima", 23, "sima");
+        Set<String> set = jedis.zrange("nima",0, 2);
+        for (String s : set) {
+            System.out.println(s);
+        }
+
     }
 
 }

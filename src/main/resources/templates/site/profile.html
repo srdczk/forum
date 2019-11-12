@@ -42,8 +42,8 @@
 							<span>注册于 <i class="text-muted" th:text="${#dates.format(user.gmtCreate, 'yyyy-MM-dd HH:mm:ss')}"></i></span>
 						</div>
 						<div class="text-muted mt-3 mb-5">
-							<span>关注了 <a class="text-primary" href="followee.html" th:text="${followeeCount}"></a> 人</span>
-							<span class="ml-4">关注者 <a class="text-primary" href="follower.html" th:text="${followerCount}"></a> 人</span>
+							<span>关注了 <a class="text-primary" th:href="@{|/followee/${user.id}|}" th:text="${followeeCount}"></a> 人</span>
+							<span class="ml-4">关注者 <a class="text-primary" th:href="@{|/follower/${user.id}|}" th:text="${followerCount}"></a> 人</span>
 							<span class="ml-4">获得了 <i class="text-danger" th:text="${likeCount}"></i> 个赞</span>
 						</div>
 					</div>
