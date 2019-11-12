@@ -32,3 +32,22 @@ window.alert = function(message) {
 	$(".alert-box .modal-body p").text(message);
 	$(".alert-box").modal("show");
 }
+function like(zanzi, entityType, entityId) {
+	$.ajax({
+		type: "POST",
+		url: "/forum/like",
+		contentType: "application/json;charset=utf-8",
+		data: JSON.stringify({
+			"entityType" : entityType,
+			"entityId" : entityId
+		}),
+		dataType: "json",
+		success:function (response) {
+			if (!response.code) {
+
+				window.location.reload();
+
+			}
+		}
+	});
+}

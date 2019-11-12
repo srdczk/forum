@@ -36,6 +36,8 @@ public class DAOTests {
     @Test
     public void testUserDAO() {
         User user = new User();
+        user.setId(1);
+        userDAO.activationSuccess(user);
         user.setId(2);
         userDAO.activationSuccess(user);
         user.setId(3);

@@ -131,7 +131,7 @@
                         <div class="text-muted font-size-12">
                             <u class="mr-3" th:text="${di.user.username}"></u> 发布于 <b th:text="${#dates.format(di.post.gmtCreate, 'yyyy-MM-dd HH:mm:ss')}"></b>
                             <ul class="d-inline float-right">
-                                <li class="d-inline ml-2">赞 11</li>
+                                <li class="d-inline ml-2">赞 <i th:text="${di.likeCount}"></i></li>
                                 <li class="d-inline ml-2">|</li>
                                 <li class="d-inline ml-2">回帖 7</li>
                             </ul>

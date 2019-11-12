@@ -5,10 +5,7 @@ import com.czk.forum.model.Comment;
 import com.czk.forum.model.DiscussPost;
 import com.czk.forum.model.Page;
 import com.czk.forum.model.User;
-import com.czk.forum.service.CommentService;
-import com.czk.forum.service.DiscussPostService;
-import com.czk.forum.service.PageService;
-import com.czk.forum.service.UserService;
+import com.czk.forum.service.*;
 import com.czk.forum.util.ForumConstant;
 import com.czk.forum.util.ForumUtil;
 import com.czk.forum.util.HostHolder;
@@ -44,6 +41,9 @@ public class DiscussPostController implements ForumConstant {
     @Autowired
     private PageService pageService;
 
+    @Autowired
+    private LikeService likeService;
+
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
     public String addDiscussPost(@RequestBody PostDTO postDTO) {
@@ -64,7 +64,7 @@ public class DiscussPostController implements ForumConstant {
     @RequestMapping(value = "/detail/{id}", method = RequestMethod.GET)
     public String getPage(Model model, @PathVariable(value = "id") Integer id, @RequestParam(value = "page", defaultValue = "1") Integer page) {
         DiscussPost post = discussPostService.findPostById(id);
-
+        User user = hostHolder.getUser();
         if (post == null) {
             model.addAttribute("msg", "抱歉,你要查找的帖子不存在!");
             model.addAttribute("target", "/forum");
@@ -86,6 +86,10 @@ public class DiscussPostController implements ForumConstant {
             map.put("comment", comment);
             map.put("user", userService.findUserById(comment.getUserId()));
             map.put("cnt", (page - 1) * 5 + cnt++);
+            map.put("likeCount", likeService.findEntityCount(2, comment.getId()));
+            if (user != null && likeService.findStatus(user.getId(), 2, comment.getId()) == 1) {
+                map.put("likeStatus", true);
+            } else map.put("likeStatus", false);
             //回复 -- 一个列表
             List<Comment> ccs = commentService.findCommentsByEntityType(ENTITY_TYPE_COMMENT, comment.getId(), 0, Integer.MAX_VALUE);
             List<Map<String, Object>> replyMaps = new ArrayList<>();
@@ -94,6 +98,10 @@ public class DiscussPostController implements ForumConstant {
                 //处理targetId
                 replyMap.put("user", userService.findUserById(cc.getUserId()));
                 replyMap.put("reply", cc);
+                replyMap.put("likeCount", likeService.findEntityCount(3, cc.getId()));
+                if (user != null && likeService.findStatus(user.getId(), 3, cc.getId()) == 1) {
+                    replyMap.put("likeStatus", true);
+                } else replyMap.put("likeStatus", false);
                 if (!cc.getTargetId().equals(0)) {
                     replyMap.put("pd", true);
                     replyMap.put("tUser", userService.findUserById(cc.getTargetId()));
@@ -106,7 +114,10 @@ public class DiscussPostController implements ForumConstant {
 
         model.addAttribute("maps", maps);
         model.addAttribute("pages", pages);
-
+        model.addAttribute("likeCount", likeService.findEntityCount(1, id));
+        if (user != null && likeService.findStatus(user.getId(), 1, id) == 1) {
+            model.addAttribute("likeStatus", true);
+        } else model.addAttribute("likeStatus", false);
         return "/site/discuss-detail";
     }
 

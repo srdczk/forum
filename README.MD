@@ -15,6 +15,8 @@
 
 [Kaptcha](https://code.google.com/archive/p/kaptcha/)
 
+[Redis](https://redis.io/commands)
+
 ### 脚本
 
 ```sql

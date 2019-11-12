@@ -3,6 +3,7 @@ package com.czk.forum.controller;
 import com.czk.forum.model.DiscussPost;
 import com.czk.forum.model.Page;
 import com.czk.forum.service.DiscussPostService;
+import com.czk.forum.service.LikeService;
 import com.czk.forum.service.PageService;
 import com.czk.forum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,9 @@ public class IndexController {
     private DiscussPostService discussPostService;
 
     @Autowired
+    private LikeService likeService;
+
+    @Autowired
     private UserService userService;
 
     @Autowired
@@ -41,6 +45,7 @@ public class IndexController {
             Map<String, Object> map = new HashMap<>();
             map.put("post", post);
             map.put("user", userService.findUserById(post.getUserId()));
+            map.put("likeCount", likeService.findEntityCount(1, post.getId()));
             dis.add(map);
         }
         model.addAttribute("dis", dis);
@@ -51,4 +56,10 @@ public class IndexController {
         return "index";
     }
     //session 在分布式下出现的问题,nigix负载均衡
+
+    @RequestMapping(value = "/error", method = RequestMethod.GET)
+    public String getErrorPage() {
+        return "/error/500";
+    }
+
 }
