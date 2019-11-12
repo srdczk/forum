@@ -3,6 +3,7 @@ package com.czk.forum.controller;
 import com.czk.forum.annotation.LoginRequired;
 import com.czk.forum.dto.PasswordDTO;
 import com.czk.forum.model.User;
+import com.czk.forum.service.FollowService;
 import com.czk.forum.service.LikeService;
 import com.czk.forum.service.UserService;
 import com.czk.forum.util.ForumUtil;
@@ -34,6 +35,9 @@ import java.util.Map;
 public class UserController {
 
     private static final Logger logger  = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    private FollowService followService;
 
     @Autowired
     private LikeService likeService;
@@ -148,6 +152,14 @@ public class UserController {
         model.addAttribute("user", user);
 
         model.addAttribute("likeCount", likeService.findUserLikeCount(user.getId()));
+
+        model.addAttribute("followerCount", followService.followerCount(id));
+
+        model.addAttribute("followeeCount", followService.followeeCount(id));
+
+        if (hostHolder.getUser() != null && followService.hasFollowed(hostHolder.getUser().getId(), 1, id)) {
+            model.addAttribute("followed", true);
+        } else model.addAttribute("followed", false);
 
         return "/site/profile";
     }

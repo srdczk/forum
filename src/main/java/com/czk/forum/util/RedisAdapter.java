@@ -162,4 +162,79 @@ public class RedisAdapter implements InitializingBean {
         }
     }
 
+    @Transactional
+    public void follow(int userId, int entityType, int entityId) {
+
+        try {
+            jedis = pool.getResource();
+            // 某个用户关注的实体:
+            // followee:userId:entityType -> zset(entityId, now);
+            String followeeKey = RedisUtil.getFolloweeKey(userId, entityType);
+            // 某个实体的所有粉丝儿
+            // follower:entityType:entityId -> zset(userId, now);
+            String followerKey = RedisUtil.getFollowerKey(entityType, entityId);
+            jedis.zadd(followeeKey, System.currentTimeMillis(), String.valueOf(entityId));
+            jedis.zadd(followerKey, System.currentTimeMillis(), String.valueOf(userId));
+
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Transactional
+    public void unfollow(int userId, int entityType, int entityId) {
+        try {
+            jedis = pool.getResource();
+            // 某个用户关注的实体:
+            // followee:userId:entityType -> zset(entityId, now);
+            String followeeKey = RedisUtil.getFolloweeKey(userId, entityType);
+            // 某个实体的所有粉丝儿
+            // follower:entityType:entityId -> zset(userId, now);
+            String followerKey = RedisUtil.getFollowerKey(entityType, entityId);
+            jedis.zrem(followeeKey, String.valueOf(entityId));
+            jedis.zrem(followerKey, String.valueOf(userId));
+
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    public long zcard(String key) {
+        try {
+            jedis = pool.getResource();
+            return jedis.zcard(key);
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+            return 0;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    public boolean isMember(String key, String val) {
+        try {
+            jedis = pool.getResource();
+            Double c = jedis.zscore(key, val);
+            if (c == null) return false;
+            else return true;
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+            return false;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
 }
