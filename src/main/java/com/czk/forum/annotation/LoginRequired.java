@@ -13,5 +13,4 @@ import java.lang.annotation.Target;
 //声明注解在生效的时间
 @Retention(value = RetentionPolicy.RUNTIME)
 public @interface LoginRequired {
-
 }
