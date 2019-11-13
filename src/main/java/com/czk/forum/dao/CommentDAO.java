@@ -26,5 +26,7 @@ public interface CommentDAO {
     @Insert("insert into comment (user_id, entity_type, entity_id, target_id, content, gmt_create) values(#{userId}, #{entityType}, #{entityId}, #{targetId}, #{content}, #{gmtCreate})")
     void add(Comment comment);
 
+    @Select("select * from comment where id=#{id}")
+    Comment getById(@Param(value = "id") Integer id);
 
 }

@@ -32,7 +32,7 @@ window.alert = function(message) {
 	$(".alert-box .modal-body p").text(message);
 	$(".alert-box").modal("show");
 }
-function like(zanzi, entityType, entityId, entityUserId) {
+function like(entityType, entityId, entityUserId, postId) {
 	$.ajax({
 		type: "POST",
 		url: "/forum/like",
@@ -40,7 +40,8 @@ function like(zanzi, entityType, entityId, entityUserId) {
 		data: JSON.stringify({
 			"entityType" : entityType,
 			"entityId" : entityId,
-			"entityUserId" : entityUserId
+			"entityUserId" : entityUserId,
+			"postId" : postId
 		}),
 		dataType: "json",
 		success:function (response) {

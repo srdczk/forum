@@ -2,11 +2,14 @@ package com.czk.forum.controller;
 
 import com.czk.forum.annotation.LoginRequired;
 import com.czk.forum.dto.FollowDTO;
+import com.czk.forum.event.EventProducer;
+import com.czk.forum.model.Event;
 import com.czk.forum.model.Page;
 import com.czk.forum.model.User;
 import com.czk.forum.service.FollowService;
 import com.czk.forum.service.PageService;
 import com.czk.forum.service.UserService;
+import com.czk.forum.util.ForumConstant;
 import com.czk.forum.util.ForumUtil;
 import com.czk.forum.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,7 @@ import java.util.List;
 import java.util.Set;
 
 @Controller
-public class FollowController {
+public class FollowController implements ForumConstant {
 
     @Autowired
     private HostHolder hostHolder;
@@ -34,6 +37,9 @@ public class FollowController {
     @Autowired
     private PageService pageService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @LoginRequired
     @RequestMapping(value = "/follow", method = RequestMethod.POST)
     @ResponseBody
@@ -41,6 +47,16 @@ public class FollowController {
 
         followService.follow(hostHolder.getUser().getId(), followDTO.getEntityType(), followDTO.getEntityId());
 
+        // 关注, 发送通知
+        // event 关注发送通知
+        // 构建Event
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(3)
+                .setEntityId(followDTO.getEntityId())
+                .setEntityUserId(followDTO.getEntityId());
+        eventProducer.fireEvent(event);
         return ForumUtil.getJSONString(0, "关注成功");
     }
 

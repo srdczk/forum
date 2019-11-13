@@ -8,13 +8,7 @@ public class LikeDTO {
 
     private Integer entityUserId;
 
-    public Integer getEntityUserId() {
-        return entityUserId;
-    }
-
-    public void setEntityUserId(Integer entityUserId) {
-        this.entityUserId = entityUserId;
-    }
+    private Integer postId;
 
     @Override
     public String toString() {
@@ -22,7 +16,24 @@ public class LikeDTO {
                 "entityType=" + entityType +
                 ", entityId=" + entityId +
                 ", entityUserId=" + entityUserId +
+                ", postId=" + postId +
                 '}';
+    }
+
+    public Integer getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Integer postId) {
+        this.postId = postId;
+    }
+
+    public Integer getEntityUserId() {
+        return entityUserId;
+    }
+
+    public void setEntityUserId(Integer entityUserId) {
+        this.entityUserId = entityUserId;
     }
 
     public Integer getEntityType() {

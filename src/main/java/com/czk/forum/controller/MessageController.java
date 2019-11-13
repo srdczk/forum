@@ -1,5 +1,6 @@
 package com.czk.forum.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.czk.forum.annotation.LoginRequired;
 import com.czk.forum.dao.UserDAO;
 import com.czk.forum.dto.MessageDTO;
@@ -8,6 +9,7 @@ import com.czk.forum.model.User;
 import com.czk.forum.service.MessageService;
 import com.czk.forum.service.PageService;
 import com.czk.forum.service.UserService;
+import com.czk.forum.util.ForumConstant;
 import com.czk.forum.util.ForumUtil;
 import com.czk.forum.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +26,7 @@ import java.util.Map;
  * created by srdczk 2019/11/11
  */
 @Controller
-public class MessageController {
+public class MessageController implements ForumConstant {
 
     @Autowired
     private PageService pageService;
@@ -38,6 +40,72 @@ public class MessageController {
     @Autowired
     private HostHolder hostHolder;
 
+    // 系统消息列表的展示
+    @LoginRequired
+    @RequestMapping(value = "/notice/list", method = RequestMethod.GET)
+    public String getNoticeList(Model model) {
+        User user = hostHolder.getUser();
+        Message comment = messageService.findRecent(TOPIC_COMMENT, user.getId());
+        if (comment == null) {
+            model.addAttribute("comment", "暂无消息");
+            model.addAttribute("cdate", System.currentTimeMillis());
+        } else {
+            Map<String, Object> map = JSONObject.parseObject(comment.getContent(), HashMap.class);
+            StringBuilder show = new StringBuilder();
+            show.append("您的");
+            if ((int) map.get("entityType") == ENTITY_TYPE_POST) {
+                show.append("帖子");
+            } else show.append("评论");
+            show.append("获得了新的回复");
+            model.addAttribute("comment", show.toString());
+            model.addAttribute("cdate", comment.getGmtCreate());
+        }
+        int commentNoticeCount = messageService.findNoticeCount(TOPIC_COMMENT, user.getId());
+        int commentNoticeUnreadCount = messageService.findNoticeUnreadCount(TOPIC_COMMENT, user.getId());
+
+        Message like = messageService.findRecent(TOPIC_COMMENT, user.getId());
+
+        if (like == null) {
+            model.addAttribute("like", "暂无消息");
+            model.addAttribute("ldate", System.currentTimeMillis());
+        } else {
+            Map<String, Object> map = JSONObject.parseObject(like.getContent(), HashMap.class);
+            StringBuilder show = new StringBuilder();
+            show.append("您的");
+            if ((int) map.get("entityType") == 1) {
+                show.append("帖子");
+            } else show.append("评论");
+            show.append("获得了新的点赞");
+            model.addAttribute("like", show.toString());
+            model.addAttribute("ldate", like.getGmtCreate());
+        }
+
+        int likeNoticeCount = messageService.findNoticeCount(TOPIC_LIKE, user.getId());
+        int likeNoticeUnreadCount = messageService.findNoticeUnreadCount(TOPIC_LIKE, user.getId());
+
+        Message follow = messageService.findRecent(TOPIC_FOLLOW, user.getId());
+        // 显示的 文字
+        if (follow == null) {
+            model.addAttribute("follow", "暂无消息");
+            model.addAttribute("fdate", System.currentTimeMillis());
+        } else {
+            model.addAttribute("follow", "有新的用户关注了您");
+            model.addAttribute("fdate", follow.getGmtCreate());
+        }
+        int followNoticeCount = messageService.findNoticeCount(TOPIC_FOLLOW, user.getId());
+        int followNoticeUnreadCount = messageService.findNoticeUnreadCount(TOPIC_FOLLOW, user.getId());
+
+        model.addAttribute("cnc", commentNoticeCount);
+        model.addAttribute("cnuc", commentNoticeUnreadCount);
+        model.addAttribute("lnc", likeNoticeCount);
+        model.addAttribute("lnuc", likeNoticeUnreadCount);
+        model.addAttribute("fnc", followNoticeCount);
+        model.addAttribute("fnuc", followNoticeUnreadCount);
+        model.addAttribute("unread", messageService.findUserUnread(user.getId()));
+        model.addAttribute("nUnread", commentNoticeUnreadCount + likeNoticeUnreadCount + followNoticeUnreadCount);
+        return "/site/notice";
+
+    }
     //私信列表的请求
     @LoginRequired
     @RequestMapping(value = "/letter/list", method = RequestMethod.GET)

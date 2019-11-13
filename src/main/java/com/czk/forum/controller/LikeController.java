@@ -2,8 +2,11 @@ package com.czk.forum.controller;
 
 import com.czk.forum.annotation.LoginRequired;
 import com.czk.forum.dto.LikeDTO;
+import com.czk.forum.event.EventProducer;
+import com.czk.forum.model.Event;
 import com.czk.forum.model.User;
 import com.czk.forum.service.LikeService;
+import com.czk.forum.util.ForumConstant;
 import com.czk.forum.util.ForumUtil;
 import com.czk.forum.util.HostHolder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-public class LikeController {
+public class LikeController implements ForumConstant {
 
     @Autowired
     private LikeService likeService;
@@ -25,6 +28,8 @@ public class LikeController {
     @Autowired
     private HostHolder hostHolder;
 
+    @Autowired
+    private EventProducer eventProducer;
 
     // 异步请求点赞
     @LoginRequired
@@ -45,6 +50,17 @@ public class LikeController {
         Map<String, Object> map = new HashMap<>();
         map.put("likeCount", likeCount);
         map.put("likeStatus", status);
+        if (status == 1) {
+            Event event = new Event()
+                    .setTopic(TOPIC_LIKE)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityType(entityType)
+                    .setEntityId(entityId)
+                    .setEntityUserId(entityUserId)
+                    .setData("postId", likeDTO.getPostId());
+            // 设置帖子的详情
+            eventProducer.fireEvent(event);
+        }
         return ForumUtil.getJSONString(0, null, map);
     }
 

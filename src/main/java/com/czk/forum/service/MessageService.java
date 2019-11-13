@@ -50,9 +50,29 @@ public class MessageService {
         messageDAO.add(message);
     }
 
+    public void addSystemMessage(Message message) {
+        messageDAO.add(message);
+    }
+
     public int readMessage(Integer msgId) {
         //修改数据的状态为1
         return messageDAO.updateStatus(msgId, 1);
     }
-    
+
+    // 查询最新的通知
+    public Message findRecent(String type, int userId) {
+        return messageDAO.getNoticeRecent(type, userId);
+    }
+
+    // 查询 通知的未读数量
+    public int findNoticeCount(String type, int userId) {
+        return messageDAO.getNoticeCount(type, userId);
+    }
+
+    public int findNoticeUnreadCount(String type, int userId) {
+        return messageDAO.getNoticeUnreadCount(type, userId);
+    }
+
+
+
 }

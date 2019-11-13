@@ -49,4 +49,8 @@ public class CommentService implements ForumConstant {
         }
     }
 
+    public Comment findById(Integer id) {
+        return commentDAO.getById(id);
+    }
+
 }

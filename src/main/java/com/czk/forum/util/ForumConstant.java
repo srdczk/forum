@@ -20,4 +20,16 @@ public interface ForumConstant {
     int ENTITY_TYPE_POST = 1;
 
     int ENTITY_TYPE_COMMENT = 2;
+
+    /**
+     * topics: 主题
+     */
+    // 评论
+    String TOPIC_COMMENT = "comment";
+    // 点赞
+    String TOPIC_LIKE = "like";
+    // 关注
+    String TOPIC_FOLLOW = "follow";
+    // 系统用户的id
+    int SYSTEM_USER_ID = 1;
 }

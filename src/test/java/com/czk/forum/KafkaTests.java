@@ -39,6 +39,7 @@ class KafkaProducer {
 
 @Component
 class KafkaConsumer {
+
     @KafkaListener(topics = {"nima"})
     public void handleMessage(ConsumerRecord record) {
         System.out.println(record.value());

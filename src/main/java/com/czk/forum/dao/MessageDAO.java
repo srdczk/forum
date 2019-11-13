@@ -48,4 +48,20 @@ public interface MessageDAO {
     @Update("update message set status=#{status} where id=#{id}")
     int updateStatus(@Param(value = "id") Integer id, @Param(value = "status") Integer status);
 
+
+    //  查看所有message
+    @Select("select * from message")
+    List<Message> getAll();
+    // 通知, 一共只有三类通知, 只需要显示最后一条通知
+    // 选取最近的一条 评论, 点赞, 关注 通知
+    @Select("select * from message where conversation_id=#{conversationId} and to_id=#{toId} order by gmt_create desc limit 0, 1")
+    Message getNoticeRecent(@Param(value = "conversationId") String conversationId, Integer toId);
+    // 所有的评论通知的数量
+    @Select("select count(*) from message where conversation_id=#{conversationId} and to_id=#{toId}")
+    Integer getNoticeCount(@Param(value = "conversationId") String conversationId, Integer toId);
+
+    // 查询未读的通知的数量
+    @Select("select count(*) from message where status=0 and conversation_id=#{conversationId} and to_id=#{toId}")
+    Integer getNoticeUnreadCount(@Param(value = "conversationId") String conversationId, Integer toId);
+
 }
