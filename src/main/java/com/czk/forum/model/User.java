@@ -1,9 +1,11 @@
 package com.czk.forum.model;
 
+import java.io.Serializable;
+
 /**
  * created by srdczk 2019/10/30
  */
-public class User {
+public class User implements Serializable {
     private Integer id;
 
     private String username;

@@ -1,10 +1,12 @@
 package com.czk.forum.interceptor;
 
-import com.czk.forum.model.LoginTicket;
 import com.czk.forum.model.User;
 import com.czk.forum.service.UserService;
 import com.czk.forum.util.CookieUtil;
 import com.czk.forum.util.HostHolder;
+import com.czk.forum.util.RedisAdapter;
+import com.czk.forum.util.RedisUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -25,15 +27,18 @@ public class LoginTicketInterceptor implements HandlerInterceptor {
     @Autowired
     private HostHolder hostHolder;
 
+    @Autowired
+    private RedisAdapter adapter;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String ticket = CookieUtil.getValue(request, "ticket");
         //System.out.println(ticket);
-        if (ticket != null) {
-            LoginTicket loginTicket = userService.findLoginTicket(ticket);
-            if (loginTicket != null && loginTicket.getStatus().equals(0) && loginTicket.getExpired() > System.currentTimeMillis()) {
+        if (StringUtils.isNotBlank(ticket)) {
+            String userId = adapter.get(RedisUtil.getTicketKey(ticket));
+            if (StringUtils.isNotBlank(userId)) {
                 //登陆成功的状态
-                User user = userService.findUserById(loginTicket.getUserId());
+                User user = userService.findUserById(Integer.parseInt(userId));
                 //在本次请求当中持有User
                 hostHolder.setUser(user);
             }

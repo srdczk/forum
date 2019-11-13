@@ -1,5 +1,7 @@
 package com.czk.forum.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class RedisUtil {
 
     private static final String SPLIT = ":";
@@ -11,6 +13,12 @@ public class RedisUtil {
     private static final String PREFIX_FOLLOWEE = "followee";
 
     private static final String PREFIX_FOLLOWER = "follower";
+
+    private static final String PREFIX_KAPTCHA = "kaptcha";
+
+    private static final String PREFIX_TICKET = "ticket";
+
+    private static final String PREFIX_USER = "user";
 
     //生成某个实体的赞
     // 需要传入实体相关
@@ -37,6 +45,21 @@ public class RedisUtil {
     // follower:entityType:entityId -> zset(userId, now)
     public static String getFollowerKey(int entityType, int entityId) {
         return PREFIX_FOLLOWER + SPLIT + entityType + SPLIT + entityId;
+    }
+
+    // 验证码属于某一个用户, 验证码 -> 辅助用户登录 -> 未登录, 并且识别用户
+    // 给用户传一个Cookie
+    public static String getKaptchaKey(String owner) {
+        return PREFIX_KAPTCHA + SPLIT + owner;
+    }
+
+    // 使用之前de
+    public static String getTicketKey(String ticket) {
+        return PREFIX_TICKET + SPLIT + ticket;
+    }
+
+    public static String getUserKey(int userId) {
+        return PREFIX_USER + SPLIT + userId;
     }
 
 }

@@ -40,6 +40,7 @@
 							<span class="float-right text-muted font-size-12">关注于 <i th:text="${#dates.format(flr.date, 'yyyy-MM-dd HH:mm:ss')}"></i></span>
 						</h6>
 						<div>
+							<input type="hidden" id="userId" th:value="${flr.user.id}">
 							<button type="button" th:class="'btn btn-sm float-right follow-btn' + ${flr.followed ? '' : ' btn-info'}" th:text="${flr.followed ? '已关注' : '关注TA'}"></button>
 						</div>
 					</div>

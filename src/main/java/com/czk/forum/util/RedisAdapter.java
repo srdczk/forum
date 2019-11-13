@@ -1,5 +1,7 @@
 package com.czk.forum.util;
 
+import com.czk.forum.model.User;
+import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -7,10 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.Response;
-import redis.clients.jedis.Transaction;
 
-import java.util.List;
+import java.io.Serializable;
 import java.util.Set;
 
 @Component
@@ -37,6 +37,21 @@ public class RedisAdapter implements InitializingBean {
         } catch (Exception e) {
             logger.error("发生异常" + e.getMessage());
             return null;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Transactional
+    public void set(String key, String val, int seconds) {
+        try {
+            jedis = pool.getResource();
+            jedis.set(key, val);
+            jedis.expire(key, seconds);
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
         } finally {
             if (jedis != null) {
                 jedis.close();
@@ -259,6 +274,63 @@ public class RedisAdapter implements InitializingBean {
         } catch (Exception e) {
             logger.error("发生异常" + e.getMessage());
             return 0;
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+
+    public void setUser(String key, User user) {
+        try {
+            jedis = pool.getResource();
+            jedis.set(key.getBytes(), SerializationUtils.serialize(user));
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    @Transactional
+    public void setUser(String key, User user, int seconds) {
+        try {
+            jedis = pool.getResource();
+            jedis.set(key.getBytes(), SerializationUtils.serialize(user));
+            jedis.expire(key.getBytes(), seconds);
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+    }
+
+    public User getUser(String key) {
+        User user = null;
+        try {
+            jedis = pool.getResource();
+            user = SerializationUtils.deserialize(jedis.get(key.getBytes()));
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
+        } finally {
+            if (jedis != null) {
+                jedis.close();
+            }
+        }
+        return user;
+    }
+
+    public void delete(String key) {
+        try {
+            jedis = pool.getResource();
+            jedis.del(key.getBytes());
+        } catch (Exception e) {
+            logger.error("发生异常" + e.getMessage());
         } finally {
             if (jedis != null) {
                 jedis.close();

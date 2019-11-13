@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Mapper
+@Deprecated
 public interface LoginTicketDAO {
 //
 //    private Integer userId;

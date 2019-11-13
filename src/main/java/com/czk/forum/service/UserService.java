@@ -1,14 +1,10 @@
 package com.czk.forum.service;
 
-import com.czk.forum.dao.LoginTicketDAO;
 import com.czk.forum.dao.UserDAO;
 import com.czk.forum.dto.LoginDTO;
 import com.czk.forum.dto.PasswordDTO;
-import com.czk.forum.model.LoginTicket;
 import com.czk.forum.model.User;
-import com.czk.forum.util.ForumConstant;
-import com.czk.forum.util.ForumUtil;
-import com.czk.forum.util.MailClient;
+import com.czk.forum.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -42,10 +37,20 @@ public class UserService implements ForumConstant {
     private String contextPath;
 
     @Autowired
-    private LoginTicketDAO loginTicketDAO;
+    private RedisAdapter adapter;
+
+    // 不推荐使用
+//    @Autowired
+//    private LoginTicketDAO loginTicketDAO;
+
 
     public User findUserById(Integer id) {
-        return userDAO.getById(id);
+        // 先从缓存中查询 :
+        User user = getCache(id);
+        if (user == null) {
+            user = initCache(id);
+        }
+        return user;
     }
 
     public Map<String, Object> register(User user) {
@@ -107,10 +112,11 @@ public class UserService implements ForumConstant {
         if (user.getStatus().equals(1)) return ACTIVATION_REPEAT;
         if (!user.getActivationCode().equals(code)) return ACTIVATION_FAILUE;
         userDAO.activationSuccess(user);
+        clearCache(userId);
         return ACTIVATION_SUCCESS;
     }
 
-    public Map<String, Object> login(LoginDTO loginDTO, HttpSession session) {
+    public Map<String, Object> login(LoginDTO loginDTO, String owner) {
         Map<String, Object> map = new HashMap<>();
         //空值判断
         if (StringUtils.isBlank(loginDTO.getUsername())) {
@@ -128,10 +134,12 @@ public class UserService implements ForumConstant {
             return map;
         }
 
-        if (!loginDTO.getVerifycode().equals(session.getAttribute("kaptcha"))) {
+        // 验证码, 和那个不一样
+        if (StringUtils.isBlank(owner) || !loginDTO.getVerifycode().equals(adapter.get(RedisUtil.getKaptchaKey(owner)))) {
             map.put("verifycodeMsg", "验证码不正确");
             return map;
         }
+        // 不存在session里面, 存在redis 里面
 
         User user = userDAO.getByName(loginDTO.getUsername());
 //        System.out.println(user);
@@ -153,34 +161,25 @@ public class UserService implements ForumConstant {
         }
 
         //生成登录凭证
-        LoginTicket loginTicket = new LoginTicket();
-        loginTicket.setUserId(user.getId());
-        loginTicket.setTicket(ForumUtil.generateUUID());
-        loginTicket.setStatus(0);
-        if (loginDTO.getRember() != null && loginDTO.getRember().equals("on")) loginTicket.setExpired(System.currentTimeMillis() + REMBER_MILSECONDS);
-        else loginTicket.setExpired(System.currentTimeMillis() + DEFAULT_MILSECONDS);
-        loginTicketDAO.add(loginTicket);
+        String ticket = ForumUtil.generateUUID();
+        String redisKey = RedisUtil.getTicketKey(ticket);
+        if (loginDTO.getRember() != null && loginDTO.getRember().equals("on"))
+            adapter.set(redisKey, String.valueOf(user.getId()), REMBER_SECONDS);
+        else adapter.set(redisKey, String.valueOf(user.getId()), DEFAULT_SECONDS);
 
-        map.put("ticket", loginTicket.getTicket());
+        map.put("ticket", ticket);
 
         return map;
     }
 
     public void logout(String ticket) {
-        LoginTicket loginTicket = loginTicketDAO.getByTicket(ticket);
-        if (loginTicket != null) {
-            loginTicket.setStatus(1);
-            loginTicketDAO.updateStatus(loginTicket);
-        }
-    }
-
-
-    public LoginTicket findLoginTicket(String ticket) {
-        return loginTicketDAO.getByTicket(ticket);
+        String redisKey = RedisUtil.getTicketKey(ticket);
+        adapter.set(redisKey, "");
     }
 
 
     public int updateAvatar(Integer userId, String avatar) {
+        clearCache(userId);
         return userDAO.updateAvatar(avatar, userId);
     }
 
@@ -233,6 +232,25 @@ public class UserService implements ForumConstant {
 
     public User findUserByName(String name) {
         return userDAO.getByName(name);
+    }
+
+    // 优先从缓存中取值
+    private User getCache(int userId) {
+        String userKey = RedisUtil.getUserKey(userId);
+        return adapter.getUser(userKey);
+    }
+
+    // 取不到值的时候初始化数据
+    private User initCache(int userId) {
+        User user = userDAO.getById(userId);
+        adapter.setUser(RedisUtil.getUserKey(userId), user, 3600);
+        return user;
+    }
+
+    // 数据变更的时候清除缓存数据
+    private void clearCache(int userId) {
+        String redisKey = RedisUtil.getUserKey(userId);
+        adapter.delete(redisKey);
     }
 
 }

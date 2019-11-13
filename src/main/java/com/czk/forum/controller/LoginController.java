@@ -3,7 +3,7 @@ package com.czk.forum.controller;
 import com.czk.forum.dto.LoginDTO;
 import com.czk.forum.model.User;
 import com.czk.forum.service.UserService;
-import com.czk.forum.util.ForumConstant;
+import com.czk.forum.util.*;
 import com.google.code.kaptcha.Producer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +33,14 @@ public class LoginController implements ForumConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private HostHolder hostHolder;
+
     @Value("${server.servlet.context-path}")
     private String path;
+
+    @Autowired
+    private RedisAdapter adapter;
 
     @RequestMapping(value = "/reg", method = RequestMethod.GET)
     public String getRegisterPage() {
@@ -92,14 +98,23 @@ public class LoginController implements ForumConstant {
     private Producer kaptchaProducer;
 
     @RequestMapping(value = "/kaptcha", method = RequestMethod.GET)
-    public void kaptcha(HttpServletResponse response, HttpSession session) {
+    public void kaptcha(HttpServletResponse response) {
         //生成验证码
         String text = kaptchaProducer.createText();
         //生成图片
         BufferedImage image = kaptchaProducer.createImage(text);
 
-        //设置本次会话
-        session.setAttribute("kaptcha", text);
+        String kaptchaOwner = ForumUtil.generateUUID();
+        Cookie cookie = new Cookie("kaptchaOwner", kaptchaOwner);
+        cookie.setMaxAge(60);
+        cookie.setPath(path);
+        response.addCookie(cookie);
+        // 随机生成一个字符串给用户, 识别用户, 因为现在还未登录, 没有userId
+
+        String redisKey = RedisUtil.getKaptchaKey(kaptchaOwner);
+        // 存储kaptcha 生成的验证码 到 redis, 并且设置过期时间 60s
+        adapter.set(redisKey, text, 60);
+
         //将图片直接输出给浏览器
         response.setContentType("image/png");
         try (OutputStream os = response.getOutputStream()){
@@ -115,15 +130,17 @@ public class LoginController implements ForumConstant {
         return session.getAttribute(name).toString();
     }
 
+    // 从Cookie中取值
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
-    public String login(LoginDTO loginDTO, HttpSession session, Model model, HttpServletResponse response) {
-        Map<String, Object> map = userService.login(loginDTO, session);
+    public String login(LoginDTO loginDTO, @CookieValue("kaptchaOwner") String kaptchaOwner, Model model, HttpServletResponse response) {
+        Map<String, Object> map = userService.login(loginDTO, kaptchaOwner);
         if (map.containsKey("ticket")) {
             Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
             cookie.setPath(path);
             if (loginDTO.getRember() != null && loginDTO.getRember().equals("on")) {
-                cookie.setMaxAge((int) (REMBER_MILSECONDS / 1000));
-            } else cookie.setMaxAge((int) (DEFAULT_MILSECONDS / 1000));
+                cookie.setMaxAge((REMBER_SECONDS));
+            } else cookie.setMaxAge((DEFAULT_SECONDS));
             response.addCookie(cookie);
             return "redirect:/";
         } else {
@@ -136,7 +153,7 @@ public class LoginController implements ForumConstant {
     }
 
     @RequestMapping(value = "/logout", method = RequestMethod.GET)
-    public String logout(@CookieValue("ticket") String ticket) {
+    public String logout(@CookieValue(value = "ticket") String ticket) {
         userService.logout(ticket);
         return "redirect:/login";
     }

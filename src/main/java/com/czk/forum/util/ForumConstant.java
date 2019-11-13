@@ -12,9 +12,9 @@ public interface ForumConstant {
     int ACTIVATION_FAILUE = 2;
 
     //默认状态下的超时时间
-    long DEFAULT_MILSECONDS = 1000 * 3600 * 12;
+    int DEFAULT_SECONDS = 3600 * 12;
 
-    long REMBER_MILSECONDS = 1000 * 3600 * 24 * 100;
+    int REMBER_SECONDS = 3600 * 24 * 100;
 
     //帖子的实体类型
     int ENTITY_TYPE_POST = 1;
